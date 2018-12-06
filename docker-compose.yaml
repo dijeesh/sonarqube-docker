@@ -1,0 +1,64 @@
+version: "2"
+
+services:
+  sonarqube:
+    image: sonarqube
+    container_name: sonarqube
+    restart: always    
+    expose:
+      - 9000
+    ports:
+      - "127.0.0.1:9000:9000"
+    networks:
+      - sonarnet
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/sonar
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=CHANGEME
+    volumes:
+      - sonarqube_conf:/opt/sonarqube/conf
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+
+  db:
+    image: postgres
+    container_name: sonarqube_db
+    restart: always    
+    networks:
+      - sonarnet
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=CHANGEME
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: sonarqube_nginx      
+    restart: always
+    networks: 
+      - sonarnet   
+    depends_on:
+      - sonarqube
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+       - /etc/letsencrypt/:/etc/letsencrypt/
+       - /usr/share/nginx/html:/usr/share/nginx/html     
+
+networks:
+  sonarnet:
+    driver: bridge
+
+volumes:
+  sonarqube_conf:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_bundled-plugins:
+  postgresql:
+  postgresql_data:
