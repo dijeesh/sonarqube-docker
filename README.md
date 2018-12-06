@@ -1,5 +1,6 @@
 # sonarqube-docker
-Setup and run Sonarqube with Postgres backend using docker-compose
+
+Setup and run Sonarqube with Postgres backend and Nginx reverse proxy using docker-compose
 
 ### Steps
 
